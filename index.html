@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width">
     <title>Movies in the Parks</title>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 
     <style>
@@ -23,8 +22,7 @@
     <!-- navigation bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#"></a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -48,13 +46,13 @@
     <div class="content" id="search">
         <h5>Search by park:</h5>
         <input id="parkInput" type="text" placeholder="Enter Park">
-        
+
         <h5>Search by movie:</h5>
         <input id="movieInput" type="text" placeholder="Enter Movie">
-        
+
         <h5>Search by day:</h5>
         <input id="dayInput" type="text" placeholder="Enter Day">
-        
+
         <button id="GoButton">GO</button>
     </div>
     <div class="content" id="list">
@@ -92,14 +90,50 @@
 
 
     <script>
-//         var endpoint = "https://data.cityofchicago.org/resource/7piw-z6r6.json"
-//         var enteredPark =
-//         var enteredMovie = 
-//         var enteredDay = 
-        
-        
+        //BUILD URL QUERY FROM USER INPUT:
+
+        function getUrlQuery() {
+            var endpoint = "https://data.cityofchicago.org/resource/7piw-z6r6.json";
+            //Save textBox input
+            var enteredPark = $("#parkInput").val();
+            var enteredMovie = $("#movieInput").val();
+            var enteredDay = $("#dayInput").val();
+            var parkSoQL = "";
+            var movieSoQL = "";
+            var daySoQL = "";
+            var firstQMEntered = false; //Track of whether a ? has already been added. If so, & will be added from there.
+            //set park SoQL
+            if(enteredPark != "") {
+                parkSoQL = "?park=" + enteredPark; //use ? (since this is the first entry)
+                firstQMEntered = true;
+            }
+            //set movie SoQL
+            if(enteredMovie != "" && firstQMEntered) {
+                movieSoQL = "&title=" + enteredMovie; //use &
+            } else if(enteredMovie != "" && !firstQMEntered) {
+                movieSoQL = "?title=" + enteredMovie; //use ?
+                firstQMEntered = true;
+            }
+            //set day SoQL
+            if(enteredDay != "" && firstQMEntered) {
+                daySoQL = "&day=" + enteredDay; //use &
+            } else if(enteredDay != "" && !firstQMEntered) {
+                daySoQL = "?day=" + enteredDay; //use ?
+                firstQMEntered = true; //for consistentcy
+            }
+            urlQuery = endpoint + parkSoQL + movieSoQL + daySoQL; //build url
+            console.log("enteredPark: " + enteredPark);
+            console.log("enteredMovie: " + enteredMovie);
+            console.log("enteredDay: " + enteredDay);
+            console.log("parkSoQL: " + parkSoQL);
+            console.log("movieSoQL: " + movieSoQL);
+            console.log("daySoQL: " + daySoQL);
+            console.log("urlQuery: " + urlQuery);
+            console.log("");
+            return urlQuery;
+        }
         $(document).ready(function() {
-            //NAVIGATE THROUGH SCREENS
+            //NAVIGATE THROUGH SCREENS:
             function hideScreens() {
                 $(".content").hide();
             }
@@ -108,12 +142,10 @@
                 var target = $(this).attr("href");
                 $(target).show();
             });
-            //CLICK THE PARK BUTTON
+            //CLICK THE PARK BUTTON:
             $("#GoButton").on("click", function(e) {
-                //1
-                $.get(endpoint + "?park=" + $("#parkInput").val()         //SoQL url query
-                               + "?title=" + $("#titleInput").val()
-                               + "?day=" + $("#dayInput").val() , function(response) {
+                //QUERY AND USE DATA:
+                $.get(getUrlQuery(), function(response) { //get url
                     $.each(response, function(i, v) { //for each json element, add a p element with data about it.
                         var p = $("<p>");
                         p.addClass("movieName");
@@ -125,16 +157,13 @@
                 });
                 $("p.movieName").html(''); //clear any previous entries
             });
-            
-            //CLICK A RESPONSE <P>
+            // CLICK A RESPONSE PARAGRAPH:
             $("body").on("click", "p.movieName", function(e) {
                 // get text of clicked element
                 var movie = $(this).text();
                 console.log("movie: " + movie);
                 //find park in array
-                $.get(endpoint + "?park=" + $("#parkInput").val()         //SoQL url query
-                               + "?title=" + $("#titleInput").val()
-                               + "?day=" + $("#dayInput").val() , function(response) { //get data
+                $.get(getUrlQuery(), function(response) { //get data
                     $.each(response, function(i, v) { //loop through each park
                         console.log("v.title: " + v.title);
                         if(v.title == movie) { //and check if park is the one clicked
