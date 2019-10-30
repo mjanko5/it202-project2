@@ -15,10 +15,28 @@
             margin: 1em;
         }
     </style>
+    
+<!--MAP -->
+    
+    <meta name="viewport" content="initial-scale=1.0">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 93%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
 
 </head>
 
 <body>
+    
     <!-- navigation bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#"></a>
@@ -47,55 +65,46 @@
 
     <!-- the content divs -->
     <div class="content" id="home">
-        <h2>Welcome to Chicago Parks Movie Nights!</h2>
-        <img src="image" alt="Image of Captain America movie in a Chicago Park" width="992" height="341">
+        <center>
+            <img src="flag1.jpg" alt="flag of Chicago" width=80 height="60">
+            <h2>Welcome to Chicago Parks Movie Nights!</h2>
+            <img src="image" alt="Image of Captain America movie in a Chicago Park" width=width height="341">
+            <br><hr>
+            <img src="park2.png" alt="watching a movie" width=width height="341">
+            <br><hr>
+            <img src="park3.jpg" alt="a movie in the pool" width=width height="341">
+            <br><br>
+            <h7>--- Navigate to Advanced Search to search for movies ---</h7>
+        </center>
     </div>
     
-    <div class="content" id="search">
-        <h5>Search by park:</h5>
-        <input id="parkInput" type="text" placeholder="Enter Park" value="Augusta Park">
-
-        <h5>Search by movie:</h5>
-        <input id="movieInput" type="text" placeholder="Enter Movie" value="Aquaman">
-
-        <h5>Search by day:</h5>
-        <input id="dayInput" type="text" placeholder="Enter Day" value="Fri">
-        <br>
-        <br>
-        <button id="GoButton">GO</button>
+    <div class="content" id="search"  bgcolor="#000000">
+        
+        <center>
+            <img src="flag1.jpg" alt="flag of Chicago" width=80 height="60">
+            <h5>Search by park:</h5>
+            <input id="parkInput" type="text" placeholder="Enter Park">
+            <br><br>
+            <h5>Search by movie:</h5>
+            <input id="movieInput" type="text" placeholder="Enter Movie">
+            <br><br>
+            <h5>Search by day:</h5>
+            <input id="dayInput" type="text" placeholder="Enter Day">
+            <br><br>
+            <button id="GoButton">GO</button>        
+        </center>
     </div>
     
     <div class="content" id="list">
-
+        <p class="noContentMessage" >No movies targeted. Please broaden your search.</p>
     </div>
     
     <div class="content" id="map">
-        Map Results page
+        <div id="map"></div>
     </div>
 
 
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" role="dialog">
-        <div class="modal-dialog">
-
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title"></h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
+    <!-- SCRIPTS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script> //src=NAME OF FILE!!! </script>
@@ -109,10 +118,43 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
+    
+    <!-- MAP KEY -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDopgA8RxvE9G6G8m7J-9g_MFUkag9tFk&callback=initMap" async defer></script>
 
-
+    <!-- GET USEFUL DATA -->
+    <script>
+    function getUsefulData(){
+        $.get("https://data.cityofchicago.org/resource/7piw-z6r6.json?$limit=5", function(responses){ //GET RESPONSES
+            console.log(responses);
+            
+            $.each(responses, function(i, v){ //FOR EACH OF RESPONSES, MAKE A MARKER
+                makeMarker(v);
+            });
+        });
+        
+    }
+    </script>
 
     <script>
+      //MAP INIT
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 41.8781, lng: -87.6298},
+          zoom: 13
+        });
+         
+        getUsefulData();
+          
+          
+
+      }
+        
+      function makeMarker(){
+            console.log("Making a marker!");
+      }
+        
         //BUILD URL QUERY FROM USER INPUT:
 
         function getUrlQuery() {
@@ -156,6 +198,10 @@
             return urlQuery;
         }
         $(document).ready(function() {
+            //show home page:
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            $("#home").show();
+            
             //NAVIGATE THROUGH SCREENS:
             function hideScreens() {
                 $(".content").hide();
@@ -167,11 +213,17 @@
             });
             //CLICK THE PARK BUTTON:
             $("#GoButton").on("click", function(e) {
+                //..//
                 //QUERY AND USE DATA:
-                $.get(getUrlQuery(), function(response) { //get url
-                    $.each(response, function(i, v) { //for each json element, add a p element with data about it.
-                        var div1 = $("<div>").addClass("col-sm").attr("data-toggle", "modal")
-                            .attr("data-target", "#myModal");
+                $.get(getUrlQuery(), function(responses) { //get url
+                    
+                    if (responses.length == 0)   $(".noContentMessage").show();
+                    else                         $(".noContentMessage").hide();
+                    
+                    //FOR EACH JSON ELEMENT, (1):ADD A CARD WITH DATA IN IT AND (2):ADD MARKER ONTO MAP:
+                    $.each(responses, function(i, v) {
+                        //BUILD CARD COMPONENTS:
+                        var div1 = $("<div>").addClass("col-sm");
                         var div2 = $("<div>").addClass("card");
                         var div3 = $("<div>").addClass("card-body");
        
@@ -179,24 +231,23 @@
                         var h6 = $("<h6>").addClass("card-park-name").text(v.park);
                         var p1 = $("<p>").addClass("card-movie-date");
                         
-                        var date = v.date.split('-').join(',').split('T');
+                        //pasre date:
+                        var date = v.date.split('-'); 
+                        var date2 = date[2].split('T');
+                        p1.text("Date: " + v.day + ", " + date[1] + "/" + date2[0] + "/" + date[0]); //set date
                         
-                        
-                        
-                        p1.text("Date: " + v.day + ", " + date[1] + "/ " + date[2] + "/ " + date[0]); //parse date
-                        
-                        
-                        var p2 = $("<p>").addClass("card-movie-rating").text("Rating: " + v.rating);
-                  
-                        var p3 = $("<p>").addClass("card-movie-cc");
+                        var p2 = $("<p>").addClass("card-movie-rating").text("Rating: " + v.rating); //set rating
+                        var p3 = $("<p>").addClass("card-movie-cc");                                 //set cc
                         v.cc == "Y" ? p3.text("Closed-Captioned") : p3.text("Not closed-captioned");
                         
-                        
-                        //append content into divs and divs into screen:
+                        //APPEND CONTENT TO CARD DIVS, AND DIVS TO SCREEN:
                         $(div3).append(h4).append(h6).append(p1).append(p2).append(p3); //append all to the inner div
                         $(div2).append(div3);
                         $(div1).append(div2);
                         $("#list").append(div1).append("<br>");
+                        
+                        //MAP STUFF:
+                        map.zoom = 1;
                     });
                     
                 });
@@ -204,32 +255,9 @@
                 $("#search").hide();
                 $("#list").show();
             });
-            // CLICK A RESPONSE PARAGRAPH:
-            $("body").on("click", "p.movieName", function(e) {
-                // get text of clicked element
-                var movie = $(this).text();
-                console.log("movie: " + movie);
-                //find park in array
-                $.get(getUrlQuery(), function(response) { //get data
-                    $.each(response, function(i, v) { //loop through each park
-                        console.log("v.title: " + v.title);
-                        if(v.title == movie) { //and check if park is the one clicked
-                            //if so, display that park: (in modal or elsehow)
-                            $(".modal-title").html(''); //clear previous entry
-                            $(".modal-title").append(v.title + "<br>");
-                            $(".modal-body").html(''); //clear previous entry
-                            $(".modal-body").append("Park: " + v.park + "<br>");
-                            $(".modal-body").append("Date: " + v.day + ", " + v.date + "<br>");
-                            console.log("Appended to modal.");
-                        }
-                    });
-                });
-                // update detail
-                // display detail      <- these two are also done above
-            });
-        });
+            
+    });
     </script>
-
 
 
 </body>
