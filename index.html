@@ -86,7 +86,7 @@
             <input id="parkInput" type="text" placeholder="Enter Park">
             <br><br>
             <h5>Search by movie:</h5>
-            <input id="movieInput" type="text" placeholder="Enter Movie">
+            <input id="movieInput" type="text" placeholder="Enter Movie" value='Spider-Man: Into the Spider-Verse'>
             <br><br>
             <h5>Search by day:</h5>
             <input id="dayInput" type="text" placeholder="Enter Day">
@@ -96,7 +96,7 @@
     </div>
     
     <div class="content" id="list">
-        <p class="noContentMessage" >No movies targeted. Please broaden your search.</p>
+        <p style="color: pink" class="contentMessage">No movies targeted. Please broaden your search.</p>
     </div>
     
     <div class="content" id="map">
@@ -141,8 +141,8 @@
       var map;
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 41.8781, lng: -87.6298},
-          zoom: 13
+          center: {lat: 41.8781, lng: -87.6298},   //chicago downtown centered
+          zoom: 10                                 //enough to see the whole of Chicago
         });
          
         getUsefulData();
@@ -150,10 +150,23 @@
           
 
       }
+      
         
       function makeMarker(){
             console.log("Making a marker!");
       }
+      
+      function deleteMarkers(){
+          markerArray.forEach(function(m){ //remove each marker from map and delete it.
+               m.setMap(null);    //remove
+               m=null;            //delete
+          });
+          markerArray = []; //reset
+      }
+        
+      var markerArray = [];
+        
+      
         
         //BUILD URL QUERY FROM USER INPUT:
 
@@ -213,16 +226,22 @@
             });
             //CLICK THE PARK BUTTON:
             $("#GoButton").on("click", function(e) {
-                //..//
+                
+                //CLEAR PREVIOUS RESULTS:
+                deleteMarkers();       //remove previous markers from map                
+                $(".col-sm").remove(); //clear any previous entries
+                $("#search").hide();   //switch from search to list tab
+                $("#list").show();
+                
                 //QUERY AND USE DATA:
                 $.get(getUrlQuery(), function(responses) { //get url
                     
-                    if (responses.length == 0)   $(".noContentMessage").show();
-                    else                         $(".noContentMessage").hide();
+                    if (responses.length == 0)   $(".contentMessage").text("No movies targeted. Please broaden your search."); //if no results: show "no results" message
+                    else                         $(".contentMessage").text("Targeted " + responses.length + " results");
                     
                     //FOR EACH JSON ELEMENT, (1):ADD A CARD WITH DATA IN IT AND (2):ADD MARKER ONTO MAP:
                     $.each(responses, function(i, v) {
-                        //BUILD CARD COMPONENTS:
+                        //(1)BUILD CARD COMPONENTS:
                         var div1 = $("<div>").addClass("col-sm");
                         var div2 = $("<div>").addClass("card");
                         var div3 = $("<div>").addClass("card-body");
@@ -234,7 +253,8 @@
                         //pasre date:
                         var date = v.date.split('-'); 
                         var date2 = date[2].split('T');
-                        p1.text("Date: " + v.day + ", " + date[1] + "/" + date2[0] + "/" + date[0]); //set date
+                        var displayDate = v.day + ", " + date[1] + "/" + date2[0] + "/" + date[0]
+                        p1.text("Date: " + displayDate); //set date
                         
                         var p2 = $("<p>").addClass("card-movie-rating").text("Rating: " + v.rating); //set rating
                         var p3 = $("<p>").addClass("card-movie-cc");                                 //set cc
@@ -244,16 +264,55 @@
                         $(div3).append(h4).append(h6).append(p1).append(p2).append(p3); //append all to the inner div
                         $(div2).append(div3);
                         $(div1).append(div2);
-                        $("#list").append(div1).append("<br>");
+                        $("#list").append(div1).append("<br class=col-sm>");
                         
-                        //MAP STUFF:
-                        map.zoom = 1;
+                        //(2) PUT MARKER ON MAP:
+                        var parkLocation = {lat: parseFloat(v.location.latitude), lng: parseFloat(v.location.longitude)};
+                        var cc;
+                        v.cc == "Y" ? cc="Yes" : cc="No";
+                        
+                        var contentString = 
+                          '<div id="content">'+
+                            
+                          '<div id="movieInfo">'+  
+                          '<h3 id="firstHeading" class="firstHeading"><u>Movie:</u> ' + v.title + '</h3>'+
+                          '<p>Date: ' + displayDate + '</p>'+ 
+                          '<p>Rating: ' + v.rating + '</p>'+ 
+                          '<p>Closed Captioned: ' + cc + '</p>'+ 
+                          '</div>'+
+                            
+                            
+                          '<div id="parkInfo">'+
+                          '<h5>' + v.park + '</h5>'+
+                          '<p>Park address: ' + v.park_address + '</p>'+
+                          '<p>Park phone: ' + v.park_phone + '</p>'+
+                          '</div>'+
+                            
+                          '</div>';    
+                        
+                        
+                        //create info window
+                        var infowindow = new google.maps.InfoWindow({
+                          content: contentString
+                        });
+                        
+                        //create marker
+                        var marker = new google.maps.Marker({
+                            position: parkLocation, map: map
+                        });
+                        markerArray.push(marker);
+                        
+                        
+                        //open info window on marker click
+                        marker.addListener('click', function() {
+                          infowindow.open(map, marker);
+                        });
+                        
+                        
+                        
                     });
                     
                 });
-                $(".col-sm").html(''); //clear any previous entries
-                $("#search").hide();
-                $("#list").show();
             });
             
     });
