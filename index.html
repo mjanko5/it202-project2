@@ -37,13 +37,12 @@
 
 <body>
     
-    <!-- navigation bar -->
+    <!-- NAVIGATION BAR -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#"></a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
@@ -59,11 +58,15 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#map">Map Results</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#about">About</a>
+                </li>
             </ul>
         </div>
     </nav>
 
-    <!-- the content divs -->
+    <!-- CONTENT DIVS -->
+    <!-- Home -->
     <div class="content" id="home">
         <center>
             <img src="flag1.jpg" alt="flag of Chicago" width=80 height="60">
@@ -77,16 +80,16 @@
             <h7>--- Navigate to Advanced Search to search for movies ---</h7>
         </center>
     </div>
-    
+
+    <!-- Search -->
     <div class="content" id="search"  bgcolor="#000000">
-        
         <center>
             <img src="flag1.jpg" alt="flag of Chicago" width=80 height="60">
             <h5>Search by park:</h5>
             <input id="parkInput" type="text" placeholder="Enter Park">
             <br><br>
             <h5>Search by movie:</h5>
-            <input id="movieInput" type="text" placeholder="Enter Movie" value='Spider-Man: Into the Spider-Verse'>
+            <input id="movieInput" type="text" placeholder="Enter Movie">
             <br><br>
             <h5>Search by day:</h5>
             <input id="dayInput" type="text" placeholder="Enter Day">
@@ -95,12 +98,24 @@
         </center>
     </div>
     
+    <!-- List -->
     <div class="content" id="list">
         <p style="color: pink" class="contentMessage">No movies targeted. Please broaden your search.</p>
     </div>
-    
+  
+    <!-- Map -->
     <div class="content" id="map">
         <div id="map"></div>
+    </div>
+    
+    <!-- About -->
+    <div class="content" id="about">
+        <h5>Movies in the Parks: your guide to watch your favorite screening on green grass!</h5>
+        <h7>Developed by Matt Jakowski --- Fall 2019 IT 202 Course @ UIC --- Project 2</h7>
+        <br><br>
+        <a href="https://github.com/mjanko5/it202-project2">github repo</a>
+        <br>
+        <a href="https://data.cityofchicago.org/Events/Chicago-Park-District-Movies-in-the-Parks-2019/7piw-z6r6">source datapage</a>
     </div>
 
 
@@ -108,13 +123,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script> //src=NAME OF FILE!!! </script>
-    
+    <!-- map key: -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     
-
-    <!--From class card example:      -->
+    <!--From class card example: -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <!--     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
@@ -122,51 +135,27 @@
     <!-- MAP KEY -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDopgA8RxvE9G6G8m7J-9g_MFUkag9tFk&callback=initMap" async defer></script>
 
-    <!-- GET USEFUL DATA -->
-    <script>
-    function getUsefulData(){
-        $.get("https://data.cityofchicago.org/resource/7piw-z6r6.json?$limit=5", function(responses){ //GET RESPONSES
-            console.log(responses);
-            
-            $.each(responses, function(i, v){ //FOR EACH OF RESPONSES, MAKE A MARKER
-                makeMarker(v);
+    
+    <script> //Most important script
+        //MAP INIT
+        var map;
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+              center: {lat: 41.8781, lng: -87.6298},   //chicago downtown centered
+              zoom: 10                                 //enough to see the whole of Chicago
             });
-        });
-        
-    }
-    </script>
+        }
 
-    <script>
-      //MAP INIT
-      var map;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 41.8781, lng: -87.6298},   //chicago downtown centered
-          zoom: 10                                 //enough to see the whole of Chicago
-        });
-         
-        getUsefulData();
-          
-          
-
-      }
-      
-        
-      function makeMarker(){
-            console.log("Making a marker!");
-      }
-      
-      function deleteMarkers(){
+        function deleteMarkers(){
           markerArray.forEach(function(m){ //remove each marker from map and delete it.
                m.setMap(null);    //remove
                m=null;            //delete
           });
           markerArray = []; //reset
-      }
+        }
+
+        var markerArray = [];
         
-      var markerArray = [];
-        
-      
         
         //BUILD URL QUERY FROM USER INPUT:
 
@@ -210,6 +199,7 @@
             console.log("");
             return urlQuery;
         }
+        
         $(document).ready(function() {
             //show home page:
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -224,6 +214,7 @@
                 var target = $(this).attr("href");
                 $(target).show();
             });
+            
             //CLICK THE PARK BUTTON:
             $("#GoButton").on("click", function(e) {
                 
@@ -241,6 +232,7 @@
                     
                     //FOR EACH JSON ELEMENT, (1):ADD A CARD WITH DATA IN IT AND (2):ADD MARKER ONTO MAP:
                     $.each(responses, function(i, v) {
+                        
                         //(1)BUILD CARD COMPONENTS:
                         var div1 = $("<div>").addClass("col-sm");
                         var div2 = $("<div>").addClass("card");
@@ -250,7 +242,7 @@
                         var h6 = $("<h6>").addClass("card-park-name").text(v.park);
                         var p1 = $("<p>").addClass("card-movie-date");
                         
-                        //pasre date:
+                        //parse date:
                         var date = v.date.split('-'); 
                         var date2 = date[2].split('T');
                         var displayDate = v.day + ", " + date[1] + "/" + date2[0] + "/" + date[0]
@@ -281,15 +273,13 @@
                           '<p>Closed Captioned: ' + cc + '</p>'+ 
                           '</div>'+
                             
-                            
                           '<div id="parkInfo">'+
                           '<h5>' + v.park + '</h5>'+
                           '<p>Park address: ' + v.park_address + '</p>'+
                           '<p>Park phone: ' + v.park_phone + '</p>'+
                           '</div>'+
                             
-                          '</div>';    
-                        
+                          '</div>';    //end contentString
                         
                         //create info window
                         var infowindow = new google.maps.InfoWindow({
@@ -309,13 +299,14 @@
                         });
                         
                         
-                        
-                    });
+                    }); //end each
                     
-                });
-            });
+                }); //end get
+                
+            }); //end on click
             
-    });
+        }); //end doc-ready
+        
     </script>
 
 
